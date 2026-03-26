@@ -50,29 +50,114 @@
         }
 
         .auth-copy {
+            position: relative;
             padding: 34px;
             background:
                 radial-gradient(circle at top right, rgba(15, 118, 110, 0.22), transparent 38%),
                 linear-gradient(160deg, #173b38 0%, #214f4b 100%);
             color: #f9fafb;
+            isolation: isolate;
+            overflow: hidden;
+        }
+
+        .auth-copy::before,
+        .auth-copy::after {
+            content: "";
+            position: absolute;
+            border-radius: 999px;
+            pointer-events: none;
+            opacity: 0.9;
+            filter: blur(2px);
+            animation: drift 14s ease-in-out infinite;
+        }
+
+        .auth-copy::before {
+            width: 220px;
+            height: 220px;
+            top: -58px;
+            right: -72px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.02) 68%);
+        }
+
+        .auth-copy::after {
+            width: 160px;
+            height: 160px;
+            bottom: 74px;
+            left: -44px;
+            background: radial-gradient(circle, rgba(240, 180, 41, 0.24), rgba(240, 180, 41, 0.03) 70%);
+            animation-delay: -5s;
         }
 
         .auth-copy h1 {
+            position: relative;
+            z-index: 1;
             font-size: clamp(2.2rem, 4vw, 4rem);
             line-height: 0.95;
             margin: 18px 0 16px;
         }
 
-        .auth-copy p { color: rgba(249, 250, 251, 0.82); line-height: 1.7; font-size: 1rem; }
-        .auth-points { display: grid; gap: 12px; margin-top: 26px; }
+        .auth-copy p { position: relative; z-index: 1; color: rgba(249, 250, 251, 0.82); line-height: 1.7; font-size: 1rem; }
+        .auth-points { position: relative; z-index: 1; display: grid; gap: 12px; margin-top: 26px; }
         .auth-points span {
             padding: 12px 14px;
             border-radius: 18px;
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.12);
+            transform: translateX(0);
+            transition: transform 0.25s ease, background 0.25s ease;
         }
 
-        .auth-panel { padding: 28px; }
+        .auth-points span:hover {
+            transform: translateX(6px);
+            background: rgba(255, 255, 255, 0.14);
+        }
+
+        .auth-metrics {
+            position: relative;
+            z-index: 1;
+            margin-top: 28px;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .metric {
+            padding: 16px 14px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(12px);
+        }
+
+        .metric strong {
+            display: block;
+            font-size: 1.55rem;
+            margin-bottom: 4px;
+        }
+
+        .metric span {
+            color: rgba(249, 250, 251, 0.72);
+            font-size: 0.88rem;
+            line-height: 1.5;
+        }
+
+        .auth-panel {
+            position: relative;
+            padding: 28px;
+            background:
+                radial-gradient(circle at top right, rgba(15, 118, 110, 0.1), transparent 30%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(255, 252, 247, 0.92));
+        }
+
+        .auth-panel::before {
+            content: "";
+            position: absolute;
+            inset: 18px;
+            border-radius: 24px;
+            border: 1px solid rgba(15, 118, 110, 0.08);
+            pointer-events: none;
+        }
+
         .tabs {
             display: inline-flex;
             padding: 6px;
@@ -91,14 +176,76 @@
             font: inherit;
             font-weight: 700;
             cursor: pointer;
+            transition: transform 0.2s ease, background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
         }
 
         .tab-btn.active { background: linear-gradient(135deg, var(--accent), var(--accent-deep)); color: #fff; }
+        .tab-btn:hover { transform: translateY(-1px); }
         .auth-title { margin-bottom: 18px; }
         .auth-title h2 { font-size: 1.6rem; margin-bottom: 6px; }
         .auth-title p, .hint { color: var(--muted); line-height: 1.7; }
+        .auth-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(15, 118, 110, 0.08);
+            border: 1px solid rgba(15, 118, 110, 0.12);
+            color: var(--accent-deep);
+            font-size: 0.92rem;
+        }
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--warm);
+            box-shadow: 0 0 0 6px rgba(194, 65, 12, 0.12);
+            transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+        }
+        .status-dot.ready {
+            background: var(--success);
+            box-shadow: 0 0 0 6px rgba(22, 101, 52, 0.14);
+            transform: scale(1.08);
+        }
         .auth-form { display: none; gap: 14px; }
         .auth-form.active { display: grid; }
+        .auth-form label {
+            position: relative;
+            padding: 12px;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.68);
+            border: 1px solid rgba(31, 41, 55, 0.08);
+            transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+        }
+        .auth-form label:focus-within {
+            transform: translateY(-2px);
+            border-color: rgba(15, 118, 110, 0.16);
+            box-shadow: 0 14px 28px rgba(15, 118, 110, 0.08);
+        }
+        .auth-progress {
+            display: flex;
+            gap: 8px;
+            margin: 4px 0 8px;
+        }
+        .progress-segment {
+            height: 6px;
+            flex: 1;
+            border-radius: 999px;
+            background: rgba(15, 118, 110, 0.12);
+            overflow: hidden;
+        }
+        .progress-segment::after {
+            content: "";
+            display: block;
+            width: 0;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(135deg, var(--accent), #23a094);
+            transition: width 0.25s ease;
+        }
+        .progress-segment.filled::after { width: 100%; }
         .app-shell { display: none; }
 
         .topbar {
@@ -199,11 +346,42 @@
             font: inherit;
             font-weight: 700;
             cursor: pointer;
-            transition: transform 0.18s ease, opacity 0.18s ease;
+            transition: transform 0.22s ease, opacity 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease;
         }
-        button:hover { transform: translateY(-1px); }
+        button:hover { transform: translateY(-1px); box-shadow: 0 16px 28px rgba(15, 118, 110, 0.18); }
         button.secondary { background: linear-gradient(135deg, #7c2d12, var(--warm)); }
-        button:disabled { opacity: 0.72; cursor: wait; }
+        button:disabled {
+            opacity: 1;
+            cursor: not-allowed;
+            filter: saturate(0.65);
+            box-shadow: none;
+            transform: none;
+        }
+        .auth-submit {
+            position: relative;
+            min-width: 170px;
+            overflow: hidden;
+        }
+        .auth-submit::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.22) 45%, transparent 100%);
+            transform: translateX(-120%);
+            transition: transform 0.35s ease;
+        }
+        .auth-submit.ready {
+            animation: pulse-ready 1.8s ease-in-out infinite;
+        }
+        .auth-submit.ready::before {
+            transform: translateX(120%);
+        }
+        .auth-submit.ready:hover {
+            transform: translateY(-2px) scale(1.01);
+        }
+        .auth-submit:not(.ready) {
+            background: linear-gradient(135deg, #9ca3af, #6b7280);
+        }
 
         .message { font-size: 0.95rem; min-height: 1.2rem; }
         .message.error { color: var(--warm); }
@@ -231,8 +409,19 @@
             background: rgba(255, 255, 255, 0.45);
         }
 
+        @keyframes drift {
+            0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+            50% { transform: translate3d(10px, 16px, 0) scale(1.06); }
+        }
+
+        @keyframes pulse-ready {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(15, 118, 110, 0.12); }
+            50% { box-shadow: 0 0 0 8px rgba(15, 118, 110, 0.02); }
+        }
+
         @media (max-width: 980px) {
             .auth-shell, .hero, .content { grid-template-columns: 1fr; }
+            .auth-metrics { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 720px) {
@@ -255,6 +444,20 @@
                     <span>Quick signup for new users</span>
                     <span>Recent feedback visible after sign-in</span>
                 </div>
+                <div class="auth-metrics">
+                    <div class="metric">
+                        <strong>24/7</strong>
+                        <span>Feedback access for students and admins</span>
+                    </div>
+                    <div class="metric">
+                        <strong>Fast</strong>
+                        <span>One-screen flow with clean guided input</span>
+                    </div>
+                    <div class="metric">
+                        <strong>Live</strong>
+                        <span>Recent responses appear right after sign-in</span>
+                    </div>
+                </div>
             </div>
             <div class="auth-panel">
                 <div class="tabs">
@@ -265,20 +468,33 @@
                     <h2 id="authTitle">Welcome back</h2>
                     <p id="authSubtitle">Login to continue to the feedback dashboard.</p>
                 </div>
+                <div class="auth-status">
+                    <span id="authStatusDot" class="status-dot"></span>
+                    <span id="authStatusText">Complete the form to continue</span>
+                </div>
                 <form id="loginForm" class="auth-form active">
+                    <div class="auth-progress" id="loginProgress">
+                        <span class="progress-segment"></span>
+                        <span class="progress-segment"></span>
+                    </div>
                     <label>Email Address<input type="email" id="loginEmail" required></label>
                     <label>Password<input type="password" id="loginPassword" required></label>
                     <div class="actions">
-                        <button type="submit" id="loginButton">Login</button>
+                        <button type="submit" id="loginButton" class="auth-submit" disabled>Login</button>
                         <span id="authMessage" class="message"></span>
                     </div>
                 </form>
                 <form id="signupForm" class="auth-form">
+                    <div class="auth-progress" id="signupProgress">
+                        <span class="progress-segment"></span>
+                        <span class="progress-segment"></span>
+                        <span class="progress-segment"></span>
+                    </div>
                     <label>Full Name<input type="text" id="signupName" required></label>
                     <label>Email Address<input type="email" id="signupEmail" required></label>
                     <label>Password<input type="password" id="signupPassword" required></label>
                     <div class="actions">
-                        <button type="submit" id="signupButton">Create Account</button>
+                        <button type="submit" id="signupButton" class="auth-submit" disabled>Create Account</button>
                         <span id="signupMessage" class="message"></span>
                     </div>
                 </form>
@@ -393,8 +609,12 @@
         const signupTabButton = document.getElementById('signupTabButton');
         const authTitle = document.getElementById('authTitle');
         const authSubtitle = document.getElementById('authSubtitle');
+        const authStatusDot = document.getElementById('authStatusDot');
+        const authStatusText = document.getElementById('authStatusText');
         const loginForm = document.getElementById('loginForm');
         const signupForm = document.getElementById('signupForm');
+        const loginButton = document.getElementById('loginButton');
+        const signupButton = document.getElementById('signupButton');
         const authMessage = document.getElementById('authMessage');
         const signupMessage = document.getElementById('signupMessage');
         const logoutButton = document.getElementById('logoutButton');
@@ -405,6 +625,74 @@
         const totalCount = document.getElementById('totalCount');
         const averageRating = document.getElementById('averageRating');
         const recommendRate = document.getElementById('recommendRate');
+        const authForms = [
+            {
+                mode: 'login',
+                form: loginForm,
+                button: loginButton,
+                progress: document.getElementById('loginProgress'),
+                fields: [
+                    document.getElementById('loginEmail'),
+                    document.getElementById('loginPassword')
+                ]
+            },
+            {
+                mode: 'signup',
+                form: signupForm,
+                button: signupButton,
+                progress: document.getElementById('signupProgress'),
+                fields: [
+                    document.getElementById('signupName'),
+                    document.getElementById('signupEmail'),
+                    document.getElementById('signupPassword')
+                ]
+            }
+        ];
+
+        function getAuthConfig(mode) {
+            return authForms.find(item => item.mode === mode);
+        }
+
+        function fieldIsComplete(field) {
+            return field.value.trim() !== '';
+        }
+
+        function syncAuthFormState(mode) {
+            const config = getAuthConfig(mode);
+            const completedCount = config.fields.filter(fieldIsComplete).length;
+            const isReady = completedCount === config.fields.length;
+
+            config.button.disabled = !isReady;
+            config.button.classList.toggle('ready', isReady);
+
+            Array.from(config.progress.children).forEach((segment, index) => {
+                segment.classList.toggle('filled', index < completedCount);
+            });
+
+            if (mode === 'login' && loginForm.classList.contains('active')) {
+                authStatusDot.classList.toggle('ready', isReady);
+                authStatusText.textContent = isReady
+                    ? 'Login details complete'
+                    : `Fill ${config.fields.length - completedCount} more field${config.fields.length - completedCount === 1 ? '' : 's'} to continue`;
+            }
+
+            if (mode === 'signup' && signupForm.classList.contains('active')) {
+                authStatusDot.classList.toggle('ready', isReady);
+                authStatusText.textContent = isReady
+                    ? 'Sign-up form is ready'
+                    : `Fill ${config.fields.length - completedCount} more field${config.fields.length - completedCount === 1 ? '' : 's'} to continue`;
+            }
+        }
+
+        function attachAuthFieldTracking() {
+            authForms.forEach(({ mode, fields }) => {
+                fields.forEach(field => {
+                    field.addEventListener('input', () => syncAuthFormState(mode));
+                    field.addEventListener('change', () => syncAuthFormState(mode));
+                });
+                syncAuthFormState(mode);
+            });
+        }
 
         function setAuthTab(mode) {
             const loginActive = mode === 'login';
@@ -420,6 +708,7 @@
             authMessage.className = 'message';
             signupMessage.textContent = '';
             signupMessage.className = 'message';
+            syncAuthFormState(mode);
         }
 
         async function apiCall(url, options = {}) {
@@ -511,6 +800,7 @@
 
         loginForm.addEventListener('submit', async (event) => {
             event.preventDefault();
+            if (loginButton.disabled) return;
             authMessage.textContent = '';
             authMessage.className = 'message';
             try {
@@ -531,6 +821,7 @@
 
         signupForm.addEventListener('submit', async (event) => {
             event.preventDefault();
+            if (signupButton.disabled) return;
             signupMessage.textContent = '';
             signupMessage.className = 'message';
             try {
@@ -594,6 +885,7 @@
                 .replaceAll('>', '&gt;');
         }
 
+        attachAuthFieldTracking();
         bootstrap();
     </script>
 </body>
