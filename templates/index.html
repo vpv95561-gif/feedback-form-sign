@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Feedback Portal</title>
+    <style>
+        :root {
+            --bg: #f7f1e8;
+            --panel: rgba(255, 253, 249, 0.86);
+            --ink: #1f2937;
+            --muted: #6b7280;
+            --line: rgba(31, 41, 55, 0.12);
+            --accent: #0f766e;
+            --accent-deep: #134e4a;
+            --warm: #c2410c;
+            --success: #166534;
+            --shadow: 0 24px 64px rgba(31, 41, 55, 0.12);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            font-family: Georgia, "Times New Roman", serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at top left, rgba(15, 118, 110, 0.16), transparent 30%),
+                radial-gradient(circle at bottom right, rgba(194, 65, 12, 0.15), transparent 28%),
+                linear-gradient(135deg, #faf5ee 0%, #efe5d6 100%);
+            padding: 24px 16px 40px;
+        }
+
+        .shell { max-width: 1180px; margin: 0 auto; }
+
+        .auth-shell, .hero-card, .summary-card, .form-card, .list-card {
+            background: var(--panel);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--line);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+        }
+
+        .auth-shell {
+            max-width: 980px;
+            margin: 0 auto;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .auth-copy {
+            padding: 34px;
+            background:
+                radial-gradient(circle at top right, rgba(15, 118, 110, 0.22), transparent 38%),
+                linear-gradient(160deg, #173b38 0%, #214f4b 100%);
+            color: #f9fafb;
+        }
+
+        .auth-copy h1 {
+            font-size: clamp(2.2rem, 4vw, 4rem);
+            line-height: 0.95;
+            margin: 18px 0 16px;
+        }
+
+        .auth-copy p { color: rgba(249, 250, 251, 0.82); line-height: 1.7; font-size: 1rem; }
+        .auth-points { display: grid; gap: 12px; margin-top: 26px; }
+        .auth-points span {
+            padding: 12px 14px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .auth-panel { padding: 28px; }
+        .tabs {
+            display: inline-flex;
+            padding: 6px;
+            border-radius: 999px;
+            background: rgba(15, 118, 110, 0.08);
+            border: 1px solid rgba(15, 118, 110, 0.14);
+            margin-bottom: 18px;
+        }
+
+        .tab-btn {
+            border: none;
+            background: transparent;
+            color: var(--accent-deep);
+            padding: 11px 18px;
+            border-radius: 999px;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .tab-btn.active { background: linear-gradient(135deg, var(--accent), var(--accent-deep)); color: #fff; }
+        .auth-title { margin-bottom: 18px; }
+        .auth-title h2 { font-size: 1.6rem; margin-bottom: 6px; }
+        .auth-title p, .hint { color: var(--muted); line-height: 1.7; }
+        .auth-form { display: none; gap: 14px; }
+        .auth-form.active { display: grid; }
+        .app-shell { display: none; }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .welcome {
+            background: rgba(255, 255, 255, 0.56);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 10px 16px;
+            color: var(--accent-deep);
+        }
+
+        .hero { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 24px; margin-bottom: 24px; }
+        .hero-card, .summary-card, .form-card, .list-card { padding: 28px; }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(15, 118, 110, 0.09);
+            color: var(--accent-deep);
+            border: 1px solid rgba(15, 118, 110, 0.14);
+            padding: 9px 14px;
+            border-radius: 999px;
+            font-size: 0.92rem;
+            margin-bottom: 18px;
+        }
+
+        .hero-card h1 { font-size: clamp(2.1rem, 5vw, 4rem); line-height: 0.95; margin-bottom: 14px; }
+        .hero-points { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 22px; }
+        .hero-points span, .pill {
+            border-radius: 999px;
+            padding: 9px 13px;
+            font-size: 0.9rem;
+            background: rgba(255, 255, 255, 0.56);
+            border: 1px solid var(--line);
+        }
+
+        .stats { display: grid; gap: 14px; margin-top: 16px; }
+        .stat {
+            padding: 18px;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.62);
+            border: 1px solid var(--line);
+        }
+        .stat strong { display: block; font-size: 2rem; color: var(--accent-deep); margin-bottom: 6px; }
+
+        .content { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 24px; }
+        .form-header, .list-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 20px; }
+
+        form { display: grid; gap: 16px; }
+        .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+        label { display: grid; gap: 8px; color: var(--accent-deep); font-size: 0.95rem; }
+
+        input, select, textarea {
+            width: 100%;
+            border: 1px solid rgba(31, 41, 55, 0.14);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.86);
+            padding: 14px 16px;
+            font: inherit;
+            color: var(--ink);
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: rgba(15, 118, 110, 0.48);
+            box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.08);
+            transform: translateY(-1px);
+        }
+
+        textarea { min-height: 150px; resize: vertical; }
+        .toggle {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.62);
+            border: 1px solid var(--line);
+        }
+        .toggle input { width: 18px; height: 18px; }
+
+        .actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+        button {
+            border: none;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+            color: #fff;
+            padding: 14px 22px;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease;
+        }
+        button:hover { transform: translateY(-1px); }
+        button.secondary { background: linear-gradient(135deg, #7c2d12, var(--warm)); }
+        button:disabled { opacity: 0.72; cursor: wait; }
+
+        .message { font-size: 0.95rem; min-height: 1.2rem; }
+        .message.error { color: var(--warm); }
+        .message.success { color: var(--success); }
+
+        .feedback-list { display: grid; gap: 14px; }
+        .feedback-item {
+            border: 1px solid var(--line);
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.66);
+            padding: 18px;
+            display: grid;
+            gap: 10px;
+        }
+        .feedback-top { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; }
+        .feedback-top strong { font-size: 1.05rem; }
+        .pill-row { display: flex; gap: 10px; flex-wrap: wrap; }
+        .feedback-item p { color: var(--muted); line-height: 1.6; }
+        .empty {
+            border: 1px dashed rgba(31, 41, 55, 0.16);
+            border-radius: 22px;
+            padding: 28px;
+            text-align: center;
+            color: var(--muted);
+            background: rgba(255, 255, 255, 0.45);
+        }
+
+        @media (max-width: 980px) {
+            .auth-shell, .hero, .content { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 720px) {
+            body { padding: 18px 12px 34px; }
+            .auth-copy, .auth-panel, .hero-card, .summary-card, .form-card, .list-card { padding: 22px; }
+            .grid { grid-template-columns: 1fr; }
+            .topbar { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <section id="authShell" class="auth-shell">
+            <div class="auth-copy">
+                <div class="eyebrow">Campus Insight Portal</div>
+                <h1>Login to Share Student Feedback</h1>
+                <p>Access the student feedback dashboard, submit course reviews, and keep track of recent responses from one secure place.</p>
+                <div class="auth-points">
+                    <span>Secure login for student submissions</span>
+                    <span>Quick signup for new users</span>
+                    <span>Recent feedback visible after sign-in</span>
+                </div>
+            </div>
+            <div class="auth-panel">
+                <div class="tabs">
+                    <button class="tab-btn active" id="loginTabButton" type="button">Login</button>
+                    <button class="tab-btn" id="signupTabButton" type="button">Sign Up</button>
+                </div>
+                <div class="auth-title">
+                    <h2 id="authTitle">Welcome back</h2>
+                    <p id="authSubtitle">Login to continue to the feedback dashboard.</p>
+                    <p class="hint">Default admin login: <strong>admin@gmail.com</strong> / <strong>Admin@123</strong></p>
+                </div>
+                <form id="loginForm" class="auth-form active">
+                    <label>Email Address<input type="email" id="loginEmail" value="admin@gmail.com" required></label>
+                    <label>Password<input type="password" id="loginPassword" value="Admin@123" required></label>
+                    <div class="actions">
+                        <button type="submit" id="loginButton">Login</button>
+                        <span id="authMessage" class="message"></span>
+                    </div>
+                </form>
+                <form id="signupForm" class="auth-form">
+                    <label>Full Name<input type="text" id="signupName" required></label>
+                    <label>Email Address<input type="email" id="signupEmail" required></label>
+                    <label>Password<input type="password" id="signupPassword" required></label>
+                    <div class="actions">
+                        <button type="submit" id="signupButton">Create Account</button>
+                        <span id="signupMessage" class="message"></span>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section id="appShell" class="app-shell">
+            <div class="topbar">
+                <div class="welcome">Signed in as <strong id="currentUserName"></strong></div>
+                <button class="secondary" id="logoutButton" type="button">Logout</button>
+            </div>
+            <section class="hero">
+                <div class="hero-card">
+                    <div class="eyebrow">Student Voice Hub</div>
+                    <h1>Student Feedback Form</h1>
+                    <p>Share what worked, what felt unclear, and where the learning experience can improve. Your feedback helps instructors and departments make sharper decisions.</p>
+                    <div class="hero-points">
+                        <span>Course feedback</span>
+                        <span>Instructor feedback</span>
+                        <span>Support service insights</span>
+                    </div>
+                </div>
+                <aside class="summary-card">
+                    <h2>Feedback Snapshot</h2>
+                    <div class="stats">
+                        <div class="stat"><strong id="totalCount">0</strong><span>Total recent submissions</span></div>
+                        <div class="stat"><strong id="averageRating">0.0</strong><span>Average student rating</span></div>
+                        <div class="stat"><strong id="recommendRate">0%</strong><span>Would recommend this course</span></div>
+                    </div>
+                </aside>
+            </section>
+            <section class="content">
+                <div class="form-card">
+                    <div class="form-header">
+                        <div>
+                            <h2>Submit Feedback</h2>
+                            <p class="hint">Fill in the form below to send structured academic feedback.</p>
+                        </div>
+                    </div>
+                    <form id="feedbackForm">
+                        <div class="grid">
+                            <label>Student Name<input type="text" id="studentName" required></label>
+                            <label>Student Email<input type="email" id="studentEmail" required></label>
+                        </div>
+                        <div class="grid">
+                            <label>Course Name<input type="text" id="courseName" required></label>
+                            <label>Instructor Name<input type="text" id="instructorName" required></label>
+                        </div>
+                        <div class="grid">
+                            <label>
+                                Semester
+                                <select id="semester" required>
+                                    <option value="">Select semester</option>
+                                    <option value="Spring 2026">Spring 2026</option>
+                                    <option value="Summer 2026">Summer 2026</option>
+                                    <option value="Fall 2026">Fall 2026</option>
+                                    <option value="Winter 2026">Winter 2026</option>
+                                </select>
+                            </label>
+                            <label>
+                                Overall Rating
+                                <select id="rating" required>
+                                    <option value="">Choose rating</option>
+                                    <option value="5">5 - Excellent</option>
+                                    <option value="4">4 - Good</option>
+                                    <option value="3">3 - Average</option>
+                                    <option value="2">2 - Needs improvement</option>
+                                    <option value="1">1 - Poor</option>
+                                </select>
+                            </label>
+                        </div>
+                        <label>
+                            Feedback Category
+                            <select id="category" required>
+                                <option value="">Select category</option>
+                                <option value="Teaching Quality">Teaching Quality</option>
+                                <option value="Course Content">Course Content</option>
+                                <option value="Assignments">Assignments</option>
+                                <option value="Communication">Communication</option>
+                                <option value="Facilities">Facilities</option>
+                                <option value="Support Services">Support Services</option>
+                            </select>
+                        </label>
+                        <label>Detailed Comments<textarea id="comments" placeholder="What should be continued, improved, or changed?" required></textarea></label>
+                        <label class="toggle"><input type="checkbox" id="recommend"><span>I would recommend this course to other students.</span></label>
+                        <div class="actions">
+                            <button type="submit" id="submitButton">Submit Feedback</button>
+                            <span id="formMessage" class="message"></span>
+                        </div>
+                    </form>
+                </div>
+                <div class="list-card">
+                    <div class="list-header">
+                        <div>
+                            <h2>Recent Feedback</h2>
+                            <p class="hint">Latest submissions appear here after they are sent.</p>
+                        </div>
+                    </div>
+                    <div id="feedbackList" class="feedback-list">
+                        <div class="empty">No feedback submitted yet.</div>
+                    </div>
+                </div>
+            </section>
+        </section>
+    </div>
+
+    <script>
+        const authShell = document.getElementById('authShell');
+        const appShell = document.getElementById('appShell');
+        const currentUserName = document.getElementById('currentUserName');
+        const loginTabButton = document.getElementById('loginTabButton');
+        const signupTabButton = document.getElementById('signupTabButton');
+        const authTitle = document.getElementById('authTitle');
+        const authSubtitle = document.getElementById('authSubtitle');
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+        const authMessage = document.getElementById('authMessage');
+        const signupMessage = document.getElementById('signupMessage');
+        const logoutButton = document.getElementById('logoutButton');
+        const feedbackForm = document.getElementById('feedbackForm');
+        const submitButton = document.getElementById('submitButton');
+        const formMessage = document.getElementById('formMessage');
+        const feedbackList = document.getElementById('feedbackList');
+        const totalCount = document.getElementById('totalCount');
+        const averageRating = document.getElementById('averageRating');
+        const recommendRate = document.getElementById('recommendRate');
+
+        function setAuthTab(mode) {
+            const loginActive = mode === 'login';
+            loginTabButton.classList.toggle('active', loginActive);
+            signupTabButton.classList.toggle('active', !loginActive);
+            loginForm.classList.toggle('active', loginActive);
+            signupForm.classList.toggle('active', !loginActive);
+            authTitle.textContent = loginActive ? 'Welcome back' : 'Create your account';
+            authSubtitle.textContent = loginActive
+                ? 'Login to continue to the feedback dashboard.'
+                : 'Sign up to access the student feedback portal.';
+            authMessage.textContent = '';
+            authMessage.className = 'message';
+            signupMessage.textContent = '';
+            signupMessage.className = 'message';
+        }
+
+        async function apiCall(url, options = {}) {
+            const response = await fetch(url, {
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                ...options
+            });
+            const payload = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(payload.error || 'Request failed');
+            return payload;
+        }
+
+        function showApp(user) {
+            currentUserName.textContent = user.full_name;
+            authShell.style.display = 'none';
+            appShell.style.display = 'block';
+        }
+
+        function showAuth() {
+            appShell.style.display = 'none';
+            authShell.style.display = 'grid';
+            setAuthTab('login');
+        }
+
+        function collectFormData() {
+            return {
+                student_name: document.getElementById('studentName').value.trim(),
+                student_email: document.getElementById('studentEmail').value.trim(),
+                course_name: document.getElementById('courseName').value.trim(),
+                instructor_name: document.getElementById('instructorName').value.trim(),
+                semester: document.getElementById('semester').value,
+                rating: document.getElementById('rating').value,
+                category: document.getElementById('category').value,
+                comments: document.getElementById('comments').value.trim(),
+                recommend: document.getElementById('recommend').checked
+            };
+        }
+
+        function updateStats(items) {
+            totalCount.textContent = items.length;
+            if (!items.length) {
+                averageRating.textContent = '0.0';
+                recommendRate.textContent = '0%';
+                return;
+            }
+            const totalRating = items.reduce((sum, item) => sum + Number(item.rating || 0), 0);
+            const recommended = items.filter(item => item.recommend).length;
+            averageRating.textContent = (totalRating / items.length).toFixed(1);
+            recommendRate.textContent = `${Math.round((recommended / items.length) * 100)}%`;
+        }
+
+        function renderFeedback(items) {
+            updateStats(items);
+            if (!items.length) {
+                feedbackList.innerHTML = '<div class="empty">No feedback submitted yet.</div>';
+                return;
+            }
+            feedbackList.innerHTML = items.map(item => `
+                <article class="feedback-item">
+                    <div class="feedback-top">
+                        <div>
+                            <strong>${escapeHtml(item.course_name)}</strong>
+                            <div class="hint">${escapeHtml(item.instructor_name)} • ${escapeHtml(item.semester)}</div>
+                        </div>
+                        <div class="pill-row">
+                            <span class="pill">${escapeHtml(item.category)}</span>
+                            <span class="pill">${item.rating}/5 rating</span>
+                            <span class="pill">${item.recommend ? 'Recommended' : 'Not recommended'}</span>
+                        </div>
+                    </div>
+                    <p>${escapeHtml(item.comments)}</p>
+                    <div class="hint">By ${escapeHtml(item.student_name)} • ${escapeHtml(item.created_at)}</div>
+                </article>
+            `).join('');
+        }
+
+        async function loadFeedback() {
+            try {
+                const items = await apiCall('/api/feedback');
+                renderFeedback(items);
+            } catch (error) {
+                feedbackList.innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`;
+            }
+        }
+
+        loginTabButton.addEventListener('click', () => setAuthTab('login'));
+        signupTabButton.addEventListener('click', () => setAuthTab('signup'));
+
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            authMessage.textContent = '';
+            authMessage.className = 'message';
+            try {
+                const payload = await apiCall('/api/login', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        email: document.getElementById('loginEmail').value.trim(),
+                        password: document.getElementById('loginPassword').value.trim()
+                    })
+                });
+                showApp(payload.user);
+                await loadFeedback();
+            } catch (error) {
+                authMessage.textContent = error.message;
+                authMessage.className = 'message error';
+            }
+        });
+
+        signupForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            signupMessage.textContent = '';
+            signupMessage.className = 'message';
+            try {
+                const payload = await apiCall('/api/signup', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        full_name: document.getElementById('signupName').value.trim(),
+                        email: document.getElementById('signupEmail').value.trim(),
+                        password: document.getElementById('signupPassword').value.trim()
+                    })
+                });
+                showApp(payload.user);
+                await loadFeedback();
+            } catch (error) {
+                signupMessage.textContent = error.message;
+                signupMessage.className = 'message error';
+            }
+        });
+
+        logoutButton.addEventListener('click', async () => {
+            await apiCall('/api/logout', { method: 'POST' });
+            showAuth();
+        });
+
+        feedbackForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            formMessage.textContent = '';
+            formMessage.className = 'message';
+            submitButton.disabled = true;
+            try {
+                await apiCall('/api/feedback', {
+                    method: 'POST',
+                    body: JSON.stringify(collectFormData())
+                });
+                feedbackForm.reset();
+                formMessage.textContent = 'Feedback submitted successfully.';
+                formMessage.className = 'message success';
+                await loadFeedback();
+            } catch (error) {
+                formMessage.textContent = error.message;
+                formMessage.className = 'message error';
+            } finally {
+                submitButton.disabled = false;
+            }
+        });
+
+        async function bootstrap() {
+            try {
+                const payload = await apiCall('/api/me');
+                showApp(payload.user);
+                await loadFeedback();
+            } catch (error) {
+                showAuth();
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value || '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;');
+        }
+
+        bootstrap();
+    </script>
+</body>
+</html>
