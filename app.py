@@ -223,9 +223,25 @@ def current_user():
     return row_to_dict(row)
 
 
+def is_admin_user(user):
+    return bool(user) and str(user.get("email", "")).lower() == DEFAULT_ADMIN_EMAIL.lower()
+
+
+def require_admin():
+    user = current_user()
+    if not is_admin_user(user):
+        return None, (jsonify({"error": "Admin access required"}), 403)
+    return user, None
+
+
 @app.route("/")
 def home():
     return render_template("index.html")
+
+
+@app.route("/admin")
+def admin():
+    return render_template("admin.html")
 
 
 @app.route("/health", methods=["GET"])
@@ -249,48 +265,7 @@ def health():
 
 @app.route("/api/signup", methods=["POST"])
 def signup():
-    data = request.get_json(silent=True) or {}
-    full_name = str(data.get("full_name", "")).strip()
-    email = str(data.get("email", "")).strip().lower()
-    password = str(data.get("password", "")).strip()
-
-    if not full_name or not email or not password:
-        return jsonify({"error": "Full name, email, and password are required"}), 400
-
-    created_at = datetime.now().strftime("%Y-%m-%d %H:%M")
-
-    try:
-        with get_connection() as connection:
-            if IS_POSTGRES:
-                execute_command(
-                    connection,
-                    """
-                    INSERT INTO users (full_name, email, password, created_at)
-                    VALUES (?, ?, ?, ?)
-                    """,
-                    (full_name, email, password, created_at),
-                )
-            else:
-                execute_command(
-                    connection,
-                    """
-                    INSERT INTO users (full_name, email, password, created_at)
-                    VALUES (?, ?, ?, ?)
-                    """,
-                    (full_name, email, password, created_at),
-                )
-            connection.commit()
-            user = execute_fetchone(
-                connection,
-                "SELECT id, full_name, email FROM users WHERE email = ?",
-                (email,),
-            )
-    except INTEGRITY_ERRORS:
-        return jsonify({"error": "An account with this email already exists"}), 400
-
-    session["user_id"] = user["id"]
-    session["user_name"] = user["full_name"]
-    return jsonify({"message": "Signup successful", "user": row_to_dict(user)}), 201
+    return jsonify({"error": "Sign up is disabled on this website"}), 403
 
 
 @app.route("/api/login", methods=["POST"])
@@ -317,6 +292,31 @@ def login():
     return jsonify({"message": "Login successful", "user": row_to_dict(user)}), 200
 
 
+@app.route("/api/admin/login", methods=["POST"])
+def admin_login():
+    data = request.get_json(silent=True) or {}
+    email = str(data.get("email", "")).strip().lower()
+    password = str(data.get("password", "")).strip()
+
+    if not email or not password:
+        return jsonify({"error": "Email and password are required"}), 400
+
+    with get_connection() as connection:
+        user = execute_fetchone(
+            connection,
+            "SELECT id, full_name, email FROM users WHERE email = ? AND password = ?",
+            (email, password),
+        )
+
+    user = row_to_dict(user)
+    if not is_admin_user(user):
+        return jsonify({"error": "Invalid admin credentials"}), 401
+
+    session["user_id"] = user["id"]
+    session["user_name"] = user["full_name"]
+    return jsonify({"message": "Admin login successful", "user": user}), 200
+
+
 @app.route("/api/logout", methods=["POST"])
 def logout():
     session.clear()
@@ -328,6 +328,14 @@ def me():
     user = current_user()
     if not user:
         return jsonify({"authenticated": False}), 401
+    return jsonify({"authenticated": True, "user": user}), 200
+
+
+@app.route("/api/admin/me", methods=["GET"])
+def admin_me():
+    user, error_response = require_admin()
+    if error_response:
+        return error_response
     return jsonify({"authenticated": True, "user": user}), 200
 
 
@@ -440,6 +448,32 @@ def submit_feedback():
         )
 
     return jsonify({"message": "Feedback submitted successfully", "feedback": serialize_feedback(row)}), 201
+
+
+@app.route("/api/admin/feedback", methods=["GET"])
+def admin_feedback():
+    user, error_response = require_admin()
+    if error_response:
+        return error_response
+
+    with get_connection() as connection:
+        rows = execute_fetchall(
+            connection,
+            """
+            SELECT id, student_name, student_email, course_name, instructor_name,
+                   semester, rating, category, comments, recommend, created_at
+            FROM feedback
+            ORDER BY id DESC
+            LIMIT 20
+            """
+        )
+
+    return jsonify(
+        {
+            "admin": user,
+            "feedback": [serialize_feedback(row) for row in rows],
+        }
+    ), 200
 
 init_db()
 
